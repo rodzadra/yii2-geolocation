@@ -1,0 +1,26 @@
+{
+    "name": "rodzadra/geolocation",
+    "description": "Returns informations about an address IP",
+    "keywords": ["yii2", "extension", "geolocation"],
+    "homepage": "https://github.com/rodzadra/yii2-geolocation",
+    "type": "yii2-extension",
+    "license": "GPL V.3",
+    "authors": [
+        {
+            "name": "Rodrigo Z. Armond",
+            "email": "rodzadra@gmail.com",
+            "homepage": "https://github.com/rodzadra"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/rodzadra/yii2-geolocation/issues?state=open",
+        "source": "https://github.com/rodzadra/yii2-geolocation"
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "autoload": {
+        "psr-4": { "rodzadra\\geolocation\\": "" }
+    }
+}
