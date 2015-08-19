@@ -5,6 +5,7 @@
     "homepage": "https://github.com/rodzadra/yii2-geolocation",
     "type": "yii2-extension",
     "license": "GPL V.3",
+    "version": "0.0.1"
     "authors": [
         {
             "name": "Rodrigo Z. Armond",

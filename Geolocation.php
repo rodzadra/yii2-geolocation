@@ -1,7 +1,9 @@
 <?php
 
+
 /**
  * @link https://github.com/rodzadra/yii2-geolocation
+ * @version 0.0.2
  * @copyright Copyright (c) 2015 rodzadra
  * @license http://opensource.org/licenses/GPL-3.0 GPL
  */
@@ -11,6 +13,7 @@ namespace rodzadra\geolocation;
 use yii;
 use yii\base\Component;
 
+
 class Geolocation extends Component{
  
     /**
@@ -18,134 +21,118 @@ class Geolocation extends Component{
      * @author rodzadra
      * @package rodzadra\yii2-geolocation
      */
-    const GEOPLUGIN_URL = 'http://www.geoplugin.net/';
-    const FREEGEOIP_URL = 'http://freegeoip.net/';
-    const FORMAT_CSV    = 'csv';
-    const FORMAT_JSON   = 'json';
-    const FORMAT_XML    = 'xml';
-    const FORMAT_PHP    = 'php';
-
-    public $config = array();
     
-    public static $provider     = self::GEOPLUGIN_URL;
-    public static $format       = self::FORMAT_PHP;
-    public static $unserialize  = FALSE;
+    public $config = ['provider'=>NULL,'return_format'=>NULL, 'api_key'=>NULL];
+        
+    private static $plugins         = array();      
+    private static $provider        = NULL;       
+    private static $return_format   = NULL;
+    private static $api_key         = NULL;
 
-    public static $ipaddress            = null;
-    public static $clientInfoLocation   = null;
-    
+
     public function __construct($config = array()) {
-        
-        //print_r($config); exit;
-        
-        if(isset($config['config']['provider']) && in_array($config['config']['provider'], ['geoplugin', 'freegeoip'])){
-                self::$provider = ($config['config']['provider'] == 'geoplugin')?self::GEOPLUGIN_URL:self::FREEGEOIP_URL;
                 
-        } else {
-                self::$provider = self::GEOPLUGIN_URL;
-        }
+        self::$plugins = array_diff(scandir((__DIR__).'/plugins/'), array('..', '.'));
         
-        if(isset($config['config']['format'])){
-            
-            if(in_array($config['config']['format'], [self::FORMAT_CSV, self::FORMAT_JSON, self::FORMAT_XML, self::FORMAT_PHP])){
-                self::$format = $config['config']['format'];                
-            } else {
-                if(self::$provider == self::GEOPLUGIN_URL){
-                    self::$format = self::FORMAT_PHP;
-                } else {
-                    self::$format = self::FORMAT_JSON;
-                }
-            }
-            
-            
-        }
-        
-        if(self::$provider == self::GEOPLUGIN_URL && self::$format == self::FORMAT_CSV){
-            self::$format = self::FORMAT_PHP;
-            self::$unserialize = TRUE;
-        } elseif(self::$provider == self::FREEGEOIP_URL && self::$format == self::FORMAT_PHP){
-            self::$format = self::FORMAT_JSON;
-        }
-        
-        if(isset($config['config']['unserialize'])){
-            if(self::$format !== self::FORMAT_PHP){
-                self::$unserialize = FALSE;
-            } else {
-                self::$unserialize = $config['config']['unserialize'];
-            }
-        }
-        
-        self::createUrl();
-        
-        return parent::__construct($config);
-        
-    }
+        if (isset($config['config']['provider'])) {
 
-        /**
-     * Try to find the real client IP
+            $provider = $config['config']['provider'];
+
+            if (in_array($provider . ".php", self::$plugins)) {
+
+                require (__DIR__) . '/plugins/' . $provider . '.php';
+
+                if (isset($config['config']['return_format'])) {
+                    $format = $config['config']['return_format'];
+                    
+                    if(in_array($format, $plugin['accepted_formats'])){
+                        self::$return_format = $format;
+                    } else {
+                        self::$return_format = $plugin['default_accepted_format'];
+                    }
+                }
+
+                self::$provider = $plugin;
+                
+                self::$api_key = (isset($config['config']['api_key']))?$config['config']['api_key']:NULL;
+
+            } else {
+                throw new \yii\web\HttpException(404, 'The requested Item could not be found.');
+            }
+        } else {
+            require (__DIR__) . '/plugins/geoplugin.php';
+            self::$provider = $plugin;
+            self::$return_format = $plugin['default_accepted_format'];
+        }
+
+        return parent::__construct($config);
+    }
+   
+    /**
+     * Creates the plugin URL
      * 
-     * @param string $ip
+     * @param strint $ip
      * @return string
      */
-    private static function findClientIP($ip=NULL) {
-        self::$ipaddress = $ip;
+    private static function createUrl($ip){
+        $urlTmp = preg_replace('!\{\{(accepted_formats)\}\}!', self::$return_format, self::$provider['plugin_url']);
+        $urlTmp = preg_replace('!\{\{(ip)\}\}!', $ip, $urlTmp);
         
-        if (self::$ipaddress == null) {
-            if (isset($_SERVER['HTTP_CLIENT_IP']))
-                $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
-            else if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
-                $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-            else if (isset($_SERVER['HTTP_X_FORWARDED']))
-                $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
-            else if (isset($_SERVER['HTTP_FORWARDED_FOR']))
-                $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
-            else if (isset($_SERVER['HTTP_FORWARDED']))
-                $ipaddress = $_SERVER['HTTP_FORWARDED'];
-            else if (isset($_SERVER['REMOTE_ADDR']))
-                $ipaddress = $_SERVER['REMOTE_ADDR'];
-            else
-                $ipaddress = NULL;
-            
-            self::$ipaddress = $ipaddress;
-        }
+        if(isset(self::$api_key))
+            $urlTmp = preg_replace('!\{\{(api_key)\}\}!', self::$api_key, $urlTmp);
         
-        return self::$ipaddress;
+        return $urlTmp;
     }
- 
+    
     /**
-     * Returns client location info
+     * Returns client info
      * 
-     * 
-     * @param string $ip
-     * @return array
+     * @param string $ip You can supply an IP address or none to use the current client IP address
+     * @return mixed
      */
-    public static function getClientInfoLocation($ip=NULL) {
-        if (self::$clientInfoLocation == null)
-            self::$clientInfoLocation = self::getContents($ip); //(self::$unserialize)?unserialize(file_get_contents(self::$provider . self::findClientIP($ip))):file_get_contents(self::$provider . self::findClientIP($ip));
+    public static function getInfo($ip=NULL){
         
-            //self::$clientInfoLocation = (unserialize(file_get_contents(self::GEOPLUGIN_URL . self::findClientIP($ip))));
-        return self::$clientInfoLocation;
-    }
+        $url = self::createUrl($ip);
+        
+        //print_r($url); exit;
+        
+        if(self::$return_format == 'php')
+            return unserialize(file_get_contents($url));
+        else
+            return file_get_contents($url);
+    }    
     
     
-    private static function createUrl(){
-        if(self::$provider == self::GEOPLUGIN_URL){
-            self::$provider .= self::$format.".gp?ip=";
-        } elseif(self::$provider == self::FREEGEOIP_URL){
-          self::$provider .= self::$format."/";
+    /**
+     * 
+     * Changes the used plugin
+     * 
+     * @param string $provider The provider plugin name
+     * @param string $format The data return format
+     */
+    public static function getPlugin($provider=NULL, $format=NULL, $api_key=NULL){
+        
+        self::$plugins = array_diff(scandir((__DIR__).'/plugins/'), array('..', '.'));
+        
+        if(isset($api_key)){
+            self::$api_key = $api_key;
         }
         
-        //print_r(self::$provider); exit;
-    }
-    
-    private static function getContents($ip=NULL){
-        if(self::$unserialize)
-            return unserialize(file_get_contents(self::$provider . self::findClientIP($ip)));
-        else
-            return file_get_contents(self::$provider . self::findClientIP($ip));
-                
-    }
+        
+        if (in_array($provider . ".php", self::$plugins)) {
 
+            require (__DIR__) . '/plugins/' . $provider . '.php';
+
+            if(in_array($format, $plugin['accepted_formats'])){
+                self::$return_format = $format;
+            } else {
+                self::$return_format = $plugin['default_accepted_format'];
+            }
+
+            self::$provider = $plugin;
+        }
+
+    }
 
  
 }

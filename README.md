@@ -1,7 +1,7 @@
 yii2-geolocation
 ================
 
-Simple Yii2 component to find geo client information.
+Simple Yii2 component to find geo customer information.
 
 [![Yii2](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](http://www.yiiframework.com/)
 
@@ -39,9 +39,9 @@ Configuration
     'geolocation' => [ 
         'class' => 'rodzadra\geolocation\Geolocation',
         'config' => [
-            'provider' => 'freegeoip', //or 'geoplugin' (the default)
-            'format' => 'php', //or 'json', 'xml' and 'csv'(see below)
-            'unserialize' => true, //(see below)
+            'provider' => '[PLUGIN_NAME]',
+            'format' =>  '[SUPORTED_PLUGIN_FORMAT]',
+            'api_key' => '[YOUR_API_KEY],
         ],
     ],
 ],
@@ -52,43 +52,80 @@ Configuration
 
 ```php
 
-provider: (string)
+provider - The name of plugin to use (see examples on @vendor/rodzadra/geolocation/plugins/);
 
-- 'geoplugin' or 'freegeoip; default to 'geoplugin';
+format - This is the return format supported by the plugin
 
-(the return) format: (string)
-
-- For Geoplugin, you have 3 formats: 'php', 'json' or 'xml'; default to 'php'.
-
-- For freegeoup, you have 3 formats: 'csv', 'json' or 'xml'; default to 'json'.
-
-unserialize: (boolean)
-
-- This param make the use of the PHP unserialize() when using the 'php' format;
+api_key - If necessary, you can pass your api key here.
 
 ```
+
+### Plugins
+
+Plugins are simple PHP files, that returns an array with three vars:
+
+- plugin_url : URL of webservice, with three special tags:
+
+a) {{accepted_formats}}
+b) {{ip}}
+c) {{api_key}}
+
+These tags will be replaced by their respective values.
+
+- accepted_formats : An array with the return acceptable formats  (example ['csv', 'php', 'json', 'xml'])
+
+- default_accepted_format : String with the default return format. (example "php")
+
+### Plugin file example
+
+```php
+<?php
+
+$plugin = [
+            'plugin_url'                => 'http://www.geoplugin.net/{{accepted_formats}}.gp?ip={{ip}}',
+            'accepted_formats'          => ['json', 'php', 'xml'],
+            'default_accepted_format'   => 'php',
+    ];
+
+```
+
 
 ### How to use
 
-On your view file.
+In your view:
 
 ```php
 
 <?php
-  print_r(yii::$app->geolocation->getClientInfoLocation());
+  print_r(yii::$app->geolocation->getInfo());
 ?>
 
 ```
-or
+
+or, to find the geolocation infos from Google server, on your view.
+
 
 ```php
 
 <?php
-  print_r(yii::$app->geolocation->getClientInfoLocation('173.194.118.22'));
+  print_r(yii::$app->geolocation->getInfo('173.194.118.22'));
 ?>
 
 ```
-to find the geolocation from Google server.
+
+To change the plugin
+--------------------
+
+
+```php
+
+<?php
+    yii::$app->geolocation->getPlugin('ippycox','XML');
+  print_r(yii::$app->geolocation->getInfo('173.194.118.22'));
+?>
+
+```
+
 
 ### What you get?
 
@@ -139,3 +176,5 @@ Using the freegeoip provider:
 
 ```
 For more information, please visit https://freegeoip.net/
+
+For another plugins infos, please use the sources. :)
