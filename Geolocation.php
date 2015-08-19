@@ -92,6 +92,9 @@ class Geolocation extends Component{
      */
     public static function getInfo($ip=NULL){
         
+        if(!isset($ip))
+            $ip = self::getIP ();
+        
         $url = self::createUrl($ip);
         
         //print_r($url); exit;
@@ -132,6 +135,16 @@ class Geolocation extends Component{
             self::$provider = $plugin;
         }
 
+    }
+    
+    private static function getIP(){
+        $ip = getenv('HTTP_CLIENT_IP')?:
+        getenv('HTTP_X_FORWARDED_FOR')?:
+        getenv('HTTP_X_FORWARDED')?:
+        getenv('HTTP_FORWARDED_FOR')?:
+        getenv('HTTP_FORWARDED')?:
+        getenv('REMOTE_ADDR');        
+        return $ip;
     }
 
  
