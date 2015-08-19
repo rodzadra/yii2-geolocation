@@ -46,7 +46,7 @@ Configuration
     ],
 ],
 
-```function and just works on
+```
 
 ### Config params
 
