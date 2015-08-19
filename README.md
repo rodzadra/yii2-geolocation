@@ -1,7 +1,7 @@
 yii2-geolocation
 ================
 
-Simple Yii2 component to find geo customer information.
+Simple Yii2 component to find geo client information.
 
 [![Yii2](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](http://www.yiiframework.com/)
 

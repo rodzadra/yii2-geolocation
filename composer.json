@@ -1,6 +1,6 @@
 {
     "name": "rodzadra/geolocation",
-    "description": "Returns informations about an address IP",
+    "description": "Simple Yii2 component to find geo client information."
     "keywords": ["yii2", "extension", "geolocation"],
     "homepage": "https://github.com/rodzadra/yii2-geolocation",
     "type": "yii2-extension",
