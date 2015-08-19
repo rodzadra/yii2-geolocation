@@ -1,7 +1,7 @@
 yii2-geolocation
 ================
 
-Simple Yii2 component to find geo customer information.
+Simple Yii2 component to find geo client information.
 
 [![Yii2](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](http://www.yiiframework.com/)
 
@@ -40,7 +40,7 @@ Configuration
         'class' => 'rodzadra\geolocation\Geolocation',
         'config' => [
             'provider' => 'freegeoip', //or 'geoplugin' (the default)
-            'format' => 'php', //or 'json', 'xml' and 'json'(see below)
+            'format' => 'php', //or 'json', 'xml' and 'csv'(see below)
             'unserialize' => true, //(see below)
         ],
     ],
@@ -54,17 +54,17 @@ Configuration
 
 provider: (string)
 
-'geoplugin' or 'freegeoip; default to 'geoplugin';
+- 'geoplugin' or 'freegeoip; default to 'geoplugin';
 
 (the return) format: (string)
 
-For Geoplugin, you have 3 formats: 'php', 'json' or 'xml'; default to 'php'
+- For Geoplugin, you have 3 formats: 'php', 'json' or 'xml'; default to 'php'.
 
-For freegeoup, you have 3 formats: 'csv', 'json' or 'xml'; default to 'json'.
+- For freegeoup, you have 3 formats: 'csv', 'json' or 'xml'; default to 'json'.
 
 unserialize: (boolean)
 
-This param make the use of the PHP unserialize() when using the 'php' format;
+- This param make the use of the PHP unserialize() when using the 'php' format;
 
 ```
 
