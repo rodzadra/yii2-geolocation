@@ -40,7 +40,7 @@ Configuration
         'class' => 'rodzadra\geolocation\Geolocation',
         'config' => [
             'provider' => '[PLUGIN_NAME]',
-            'format' =>  '[SUPORTED_PLUGIN_FORMAT]',
+            'return_formats' =>  '[SUPORTED_PLUGIN_FORMATS]',
             'api_key' => '[YOUR_API_KEY],
         ],
     ],
@@ -54,7 +54,7 @@ Configuration
 
 provider - The name of plugin to use (see examples on @vendor/rodzadra/geolocation/plugins/);
 
-format - This is the return format supported by the plugin
+return_formats - The return formats supported by the plugin
 
 api_key - If necessary, you can pass your api key here.
 
@@ -67,7 +67,9 @@ Plugins are simple PHP files, that returns an array with three vars:
 - plugin_url : URL of webservice, with three special tags:
 
 a) {{accepted_formats}}
+
 b) {{ip}}
+
 c) {{api_key}}
 
 These tags will be replaced by their respective values.
