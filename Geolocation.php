@@ -22,11 +22,11 @@ class Geolocation extends Component{
      * @package rodzadra\yii2-geolocation
      */
     
-    public $config = ['provider'=>NULL,'return_format'=>NULL, 'api_key'=>NULL];
+    public $config = ['provider'=>NULL,'return_formats'=>NULL, 'api_key'=>NULL];
         
     private static $plugins         = array();      
     private static $provider        = NULL;       
-    private static $return_format   = NULL;
+    private static $return_formats   = NULL;
     private static $api_key         = NULL;
 
 
@@ -42,13 +42,13 @@ class Geolocation extends Component{
 
                 require (__DIR__) . '/plugins/' . $provider . '.php';
 
-                if (isset($config['config']['return_format'])) {
-                    $format = $config['config']['return_format'];
+                if (isset($config['config']['return_formats'])) {
+                    $format = $config['config']['return_formats'];
                     
                     if(in_array($format, $plugin['accepted_formats'])){
-                        self::$return_format = $format;
+                        self::$return_formats = $format;
                     } else {
-                        self::$return_format = $plugin['default_accepted_format'];
+                        self::$return_formats = $plugin['default_accepted_format'];
                     }
                 }
 
@@ -62,7 +62,7 @@ class Geolocation extends Component{
         } else {
             require (__DIR__) . '/plugins/geoplugin.php';
             self::$provider = $plugin;
-            self::$return_format = $plugin['default_accepted_format'];
+            self::$return_formats = $plugin['default_accepted_format'];
         }
 
         return parent::__construct($config);
@@ -75,7 +75,7 @@ class Geolocation extends Component{
      * @return string
      */
     private static function createUrl($ip){
-        $urlTmp = preg_replace('!\{\{(accepted_formats)\}\}!', self::$return_format, self::$provider['plugin_url']);
+        $urlTmp = preg_replace('!\{\{(accepted_formats)\}\}!', self::$return_formats, self::$provider['plugin_url']);
         $urlTmp = preg_replace('!\{\{(ip)\}\}!', $ip, $urlTmp);
         
         if(isset(self::$api_key))
@@ -99,7 +99,7 @@ class Geolocation extends Component{
         
         //print_r($url); exit;
         
-        if(self::$return_format == 'php')
+        if(self::$return_formats == 'php')
             return unserialize(file_get_contents($url));
         else
             return file_get_contents($url);
@@ -127,9 +127,9 @@ class Geolocation extends Component{
             require (__DIR__) . '/plugins/' . $provider . '.php';
 
             if(in_array($format, $plugin['accepted_formats'])){
-                self::$return_format = $format;
+                self::$return_formats = $format;
             } else {
-                self::$return_format = $plugin['default_accepted_format'];
+                self::$return_formats = $plugin['default_accepted_format'];
             }
 
             self::$provider = $plugin;
